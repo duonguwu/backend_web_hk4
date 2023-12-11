@@ -41,6 +41,11 @@ return [
             'provider' => 'users',
             'hash' => false,
         ],
+        'api' => [
+            'driver' => 'token',
+            'provider' => 'users',
+            'hash' => false,
+        ],
         // 'api' => [
         //     'driver' => 'passport', // Sử dụng Passport driver cho guard 'api'
         //     'provider' => 'users',
