@@ -6,7 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartController;
-
+use App\Http\Controllers\WishlistController;
 
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
@@ -47,8 +47,13 @@ Route::get('/categories/{id}', [CategoryController::class, 'show']);
 Route::prefix('user')->group(function () {
     Route::middleware(['checkCart'])->prefix('cart')->group(function () {
         Route::post('add', [CartController::class, 'addToCart']);
-        Route::put('/update/{cartItemId}', [CartController::class, 'updateCartItem']);
-        Route::delete('/remove/{cartItemId}', [CartController::class, 'removeFromCart']);
-        Route::get('/get', [CartController::class, 'getCartItems2']);
+        Route::post('/update/{productId}', [CartController::class, 'updateProductQty']);
+        Route::delete('/remove/{productId}', [CartController::class, 'removeFromCart']);
+        Route::get('/get', [CartController::class, 'getCartItems']);
+    });
+    Route::middleware(['checkWishlist'])->prefix('wishlist')->group(function () {
+        Route::post('add', [WishlistController::class, 'addToWishlist']);
+        Route::delete('/remove/{productId}', [WishlistController::class, 'removeFromWishlist']);
+        Route::get('/get', [WishlistController::class, 'getWishlistItems']);
     });
 });

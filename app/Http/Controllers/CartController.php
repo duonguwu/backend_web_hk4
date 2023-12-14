@@ -13,18 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
-
-    // public function getCartItems2(Request $request)
-    // {
-    //     // Lấy thông tin người dùng hiện tại
-    //     $user = $request->user();
-
-    //     // Lấy danh sách các sản phẩm trong giỏ hàng của người dùng
-    //     $cartItems = $user->cart->cartDetails;
-
-    //     return response()->json(['cartItems' => $cartItems]);
-    // }
-    public function getCartItems2(Request $request)
+    public function getCartItems(Request $request)
     {
         // Kiểm tra xem token có tồn tại trong yêu cầu không
         $token = $request->header('Authorization');
@@ -43,12 +32,13 @@ class CartController extends Controller
                 $cartItems = $user->cart->cartDetails;
                 $formattedCartItems = $cartItems->map(function ($cartItem) {
                     return [
-                        'product_id' => $cartItem->product_id,
+                        '_id' => $cartItem->product_id,
                         'qty' => $cartItem->quantity,
                         'name' => $cartItem->product->name,
                         'image' => $cartItem->product->image,
                         'newPrice' => $cartItem->product->newPrice,
                         'price' => $cartItem->product->price,
+                        'quantity' => $cartItem->product->quantity,
                         // Thêm các thông tin khác nếu cần
 
                     ];
@@ -122,46 +112,96 @@ class CartController extends Controller
         }
     }
 
-    public function updateCartItem(Request $request, $cartItemId)
+    public function updateProductQty($productId, Request $request)
     {
-        // Xử lý cập nhật số lượng sản phẩm trong giỏ hàng
-    }
+        // Kiểm tra xem người dùng có đăng nhập không
+        $token = $request->header('Authorization');
+        $tokenModel = DB::table('personal_access_tokens')
+            ->where('token', hash('sha256', $token))
+            ->first();
 
-    public function removeFromCart($cartItemId)
-    {
-        // Xử lý xóa sản phẩm khỏi giỏ hàng
-    }
-
-    public function getCartItems($userId)
-    {
-        // Kiểm tra xác thực người dùng
-        $user = User::find($userId);
+        $user = User::find($tokenModel->tokenable_id);
         if (!$user) {
             return response()->json([
-                'status' => 404,
-                'errors' => ['User not found'],
-            ], 404);
+                'status' => 401,
+                'errors' => ['User not authenticated'],
+            ], 401);
         }
 
-        // Lấy giỏ hàng của người dùng
         $cart = $user->cart;
-
-        // Kiểm tra xem giỏ hàng có tồn tại hay không
-        if (!$cart) {
+        // Lấy chi tiết giỏ hàng của sản phẩm cần cập nhật
+        $cartDetail = CartDetail::where('cart_id', $cart->id)
+            ->where('product_id', $productId)
+            ->first();
+        if (!$cartDetail) {
             return response()->json([
                 'status' => 404,
-                'errors' => ['Cart not found'],
+                'errors' => ['Product not found in cart'],
             ], 404);
         }
+        // Xử lý hành động cập nhật
+        $actionType = data_get($request->json()->all(), 'action.type');
 
-        // Lấy chi tiết giỏ hàng
-        $cartItems = $cart->cartDetails;
+        if ($actionType === 'increment') {
+            $cartDetail->quantity += 1;
+        } elseif ($actionType === 'decrement' && $cartDetail->quantity > 1) {
+            $cartDetail->quantity -= 1;
+        } else {
+            // Nếu số lượng là 1 và người dùng muốn giảm, hãy xóa sản phẩm khỏi giỏ hàng
+            $cartDetail->delete();
+            return response()->json([
+                'status' => 200,
+                'message' => 'Product removed from cart successfully',
+            ], 200);
+        }
 
-        // Trả về thông tin giỏ hàng và các mặt hàng trong nó
+        // Lưu thay đổi
+        $cartDetail->save();
+
         return response()->json([
             'status' => 200,
-            'cart' => $cart,
-            'items' => $cartItems,
+            'message' => 'Product quantity updated successfully',
+            'cart' => $user->cart->cartDetails,
+        ], 200);
+    }
+
+    public function removeFromCart($productId, Request $request)
+    {
+        // Xử lý xóa sản phẩm khỏi giỏ hàng
+        // Kiểm tra xem người dùng có đăng nhập không
+        $token = $request->header('Authorization');
+        $tokenModel = DB::table('personal_access_tokens')
+            ->where('token', hash('sha256', $token))
+            ->first();
+
+        $user = User::find($tokenModel->tokenable_id);
+        if (!$user) {
+            return response()->json([
+                'status' => 401,
+                'errors' => ['User not authenticated'],
+            ], 401);
+        }
+
+        $cart = $user->cart;
+        // Lấy chi tiết giỏ hàng của sản phẩm cần cập nhật
+        $cartDetail = CartDetail::where('cart_id', $cart->id)
+            ->where('product_id', $productId)
+            ->first();
+        if (!$cartDetail) {
+            return response()->json([
+                'status' => 404,
+                'errors' => ['Product not found in cart'],
+            ], 404);
+        }
+        $cartDetail->delete();
+
+        $cartItems = $this->getCartItems($request)->getData();
+        $cartData = isset($cartItems->cart) ? json_decode(json_encode($cartItems->cart), true) : [];
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Product removed from cart successfully',
+            'cart' => $cartData,
         ], 200);
     }
 }

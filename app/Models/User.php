@@ -50,4 +50,8 @@ class User extends Authenticatable
     {
         return $this->hasOne(Cart::class);
     }
+    public function wishlist()
+    {
+        return $this->hasOne(Wishlist::class);
+    }
 }

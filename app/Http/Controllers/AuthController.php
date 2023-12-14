@@ -134,7 +134,7 @@ class AuthController extends Controller
             /** @var \App\Models\User $user **/ // đánh dấu đây là user từ Models
             $user = Auth::user();
             $token = $user->createToken('authToken')->plainTextToken;
-            $user->api_token = explode('|', $token)[1];
+            $user->remember_token = explode('|', $token)[1];
             $user->save();
             //var_dump($token);
             return response()->json(['encodedToken' => explode('|', $token)[1], 'foundUser' => $user], 200);

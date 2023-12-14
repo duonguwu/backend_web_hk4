@@ -9,17 +9,16 @@ class UpdateCategoryNames extends Migration
 {
     public function up()
     {
-        Schema::table('categories', function (Blueprint $table) {
-            $table->string('categoryName', 255)->change();
+        Schema::create('categories', function (Blueprint $table) {
+            $table->char('_id', 36)->primary();
+            $table->string('categoryName');
+            $table->text('description')->nullable();
+            $table->string('categoryImg')->nullable();
         });
-
-        DB::table('categories')->update([
-            'categoryName' => DB::raw("CONCAT(UCASE(LEFT(categoryName, 1)), LCASE(SUBSTRING(categoryName FROM 2)))"),
-        ]);
     }
 
     public function down()
     {
-        // Ngược lại thay đổi trong trường hợp rollback
+        Schema::dropIfExists('categories');
     }
 }
