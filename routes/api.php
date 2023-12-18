@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\CheckoutController;
 
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
@@ -56,4 +57,5 @@ Route::prefix('user')->group(function () {
         Route::delete('/remove/{productId}', [WishlistController::class, 'removeFromWishlist']);
         Route::get('/get', [WishlistController::class, 'getWishlistItems']);
     });
+    Route::post('/checkout/place-order', [CheckoutController::class, 'placeOrder']);
 });

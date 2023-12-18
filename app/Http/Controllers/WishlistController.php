@@ -56,11 +56,11 @@ class WishlistController extends Controller
         try {
             // Lấy dữ liệu sản phẩm từ yêu cầu
             $productData = data_get($request->json()->all(), 'product');
-            // return response()->json($productData);
+            //return response()->json($productData);
             //return response()->json($productData);
             // Kiểm tra sự tồn tại của sản phẩm
             $product = Product::where('_id', $productData['_id'])->first();
-            // return response()->json($product);
+            return response()->json($productData['_id']);
             if (!$product) {
                 return response()->json([
                     'status' => 404,
