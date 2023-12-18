@@ -58,4 +58,6 @@ Route::prefix('user')->group(function () {
         Route::get('/get', [WishlistController::class, 'getWishlistItems']);
     });
     Route::post('/checkout/place-order', [CheckoutController::class, 'placeOrder']);
+    Route::get('/getInvoices', [CheckoutController::class, 'getUserInvoices']);
+    Route::get('/getInvoices/{invoiceId}', [CheckoutController::class, 'getInvoiceDetails']);
 });

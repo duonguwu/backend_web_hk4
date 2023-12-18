@@ -36,15 +36,6 @@ class CheckoutController extends Controller
 
                 $address->save();
             }
-            // return response()->json(['no address' => $address->id]);
-            // Xử lý lưu đơn hàng vào database
-
-            // $productData = data_get($request->json()->all(), 'productList');
-            //$product = Product::where('_id', $productData['productId'])->first();
-
-
-            //return response()->json(['orderData' => $orderData]);
-            //return response()->json(['totalItems' => data_get($request->json()->all(), 'actualPriceOfCart')]);
             $invoice = new Invoice([
                 'user_id' => $user->id,
                 'address_id' => $address->id,
@@ -58,8 +49,6 @@ class CheckoutController extends Controller
 
             // Lấy dữ liệu sản phẩm từ yêu cầu
             $productData = data_get($request->json()->all(), 'productList');
-            //return response()->json(['product' => $productData]);
-            //return response()->json(['product' => $productData]);
             // Lưu chi tiết đơn hàng
             foreach ($productData as $product) {
                 $invoiceDetail = new InvoiceDetail([
@@ -81,5 +70,35 @@ class CheckoutController extends Controller
             'status' => 401,
             'errors' => ['User not authenticated'],
         ], 401);
+    }
+    public function getUserInvoices(Request $request)
+    {
+        $token = $request->header('Authorization');
+        $tokenModel = DB::table('personal_access_tokens')
+            ->where('token', hash('sha256', $token))
+            ->first();
+
+        $user = User::find($tokenModel->tokenable_id);
+        $invoices = Invoice::where('user_id', $user->id)->get();
+
+        return response()->json($invoices);
+    }
+    public function getInvoiceDetails($invoiceId, Request $request)
+    {
+        $token = $request->header('Authorization');
+        $tokenModel = DB::table('personal_access_tokens')
+            ->where('token', hash('sha256', $token))
+            ->first();
+
+        $user = User::find($tokenModel->tokenable_id);
+        $invoice = Invoice::where('user_id', $user->id)
+            ->with('details.product') // Sử dụng eager loading để lấy cả chi tiết sản phẩm
+            ->find($invoiceId);
+
+        if ($invoice) {
+            return response()->json($invoice);
+        } else {
+            return response()->json(['error' => 'Invoice not found'], 404);
+        }
     }
 }
