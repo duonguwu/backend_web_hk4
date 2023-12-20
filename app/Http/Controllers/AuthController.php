@@ -118,7 +118,7 @@ class AuthController extends Controller
         // Lấy danh sách sản phẩm từ bảng products
         $user = User::all();
         // Trả về danh sách sản phẩm dưới dạng JSON
-        return response()->json(['products' => $user], 200);
+        return response()->json(['user' => $user], 200);
     }
 
     //Login

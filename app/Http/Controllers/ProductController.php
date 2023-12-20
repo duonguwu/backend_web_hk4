@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+
 use Illuminate\Http\Request;
 use App\Models\Product; // Import model Product
 
@@ -29,5 +30,22 @@ class ProductController extends Controller
 
         // Trả về thông tin sản phẩm dưới dạng JSON
         return response()->json(['products' => $product],);
+    }
+    public function addProduct(Request $request)
+    {
+        // Validate the request data
+        $validatedData = $request->json()->all();
+
+        // Save the image to public/assets
+        $imagePath = $request->file('image')->store('assets', 'public');
+
+        // Create a new product
+        $product = new Product($validatedData);
+        $product->image = $imagePath;
+
+        // Save the product to the database
+        $product->save();
+
+        return response()->json(['message' => 'Product added successfully'], 201);
     }
 }

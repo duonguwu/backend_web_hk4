@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\AddressController;
 
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
@@ -44,7 +45,12 @@ Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{id}', [CategoryController::class, 'show']);
 //Route::post('/login', [AuthController::class, 'login']);
 
-
+Route::prefix('admin')->group(function () {
+    Route::get('/getUser', [AuthController::class, 'index']);
+    Route::get('/getInvoices', [CheckoutController::class, 'getAllInvoice']);
+    Route::get('/getInvoices/{invoiceId}', [CheckoutController::class, 'getAllInvoiceDetails']);
+    Route::post('/addproduct', [ProductController::class, 'addProduct']);
+});
 Route::prefix('user')->group(function () {
     Route::middleware(['checkCart'])->prefix('cart')->group(function () {
         Route::post('add', [CartController::class, 'addToCart']);
@@ -60,4 +66,6 @@ Route::prefix('user')->group(function () {
     Route::post('/checkout/place-order', [CheckoutController::class, 'placeOrder']);
     Route::get('/getInvoices', [CheckoutController::class, 'getUserInvoices']);
     Route::get('/getInvoices/{invoiceId}', [CheckoutController::class, 'getInvoiceDetails']);
+    Route::post('/address', [AddressController::class, 'storeAddress']);
+    Route::get('/address/get', [AddressController::class, 'getAddress']);
 });
