@@ -9,19 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     protected $table = 'products';
-
-    // Tên trường ID
-    //public $primaryKey = '_id';
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            $model->{$model->getKeyName()} = (string) Str::uuid();
-        });
-    }
-    public function getFormattedPriceAttribute()
-    {
-        return number_format($this->price * 1000, 0, '', '.');
-    }
+    public $timestamps = false;
+    protected $primaryKey = '_id';
+    public $incrementing = false;
 }

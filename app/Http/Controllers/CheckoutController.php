@@ -130,6 +130,10 @@ class CheckoutController extends Controller
                         'quantity' => $product['quantity'],
                         'price' => $product['price'],
                     ]);
+                    $productDB = Product::where('_id', $product['productId'])->first();
+                    //return response()->json($productDB);
+                    $productDB->quantity = $productDB->quantity - $product['quantity'];
+                    $productDB->save(['_id' => $productDB->_id]);
                     $invoiceDetail->save();
                 }
                 return response()->json(['message' => 'Order placed successfully', 'vnpay_url' => $vnp_Url]);
@@ -198,9 +202,29 @@ class CheckoutController extends Controller
                         'quantity' => $product['quantity'],
                         'price' => $product['price'],
                     ]);
+                    $productDB = Product::where('_id', $product['productId'])->first();
+                    //return response()->json($productDB);
+                    $productDB->quantity = $productDB->quantity - $product['quantity'];
+                    $productDB->save(['_id' => $productDB->_id]);
                     $invoiceDetail->save();
                 }
                 return response()->json(['message' => 'Order placed successfully',  'payUrl' => $momoUrl]);
+            } else {
+                $productData = data_get($request->json()->all(), 'productList');
+                foreach ($productData as $product) {
+                    $invoiceDetail = new InvoiceDetail([
+                        'invoice_id' => $invoice->id,
+                        'product_id' => $product['productId'],
+                        'quantity' => $product['quantity'],
+                        'price' => $product['price'],
+                    ]);
+                    $productDB = Product::where('_id', $product['productId'])->first();
+                    //return response()->json($productDB);
+                    $productDB->quantity = $productDB->quantity - $product['quantity'];
+                    $productDB->save(['_id' => $productDB->_id]);
+                    $invoiceDetail->save();
+                    return response()->json(['message' => 'Order placed successfully']);
+                }
             }
 
 
@@ -217,6 +241,14 @@ class CheckoutController extends Controller
     // 9704 0000 0000 0018
     // 03/07
     // OTP
+
+    // Ngân hàng	NCB
+    // Số thẻ	9704198526191432198
+    // Tên chủ thẻ	NGUYEN VAN A
+    // Ngày phát hành	07/15
+    // Mật khẩu OTP	123456
+
+
     // public function handleVnpayReturn(Request $request)
     // {
     //     $vnp_TxnRef = $request->input('vnp_TxnRef'); // Mã đơn hàng

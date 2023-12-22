@@ -34,15 +34,42 @@ class ProductController extends Controller
     public function addProduct(Request $request)
     {
         // Validate the request data
-        $validatedData = $request->json()->all();
-
+        $validatedData = $request->validate([
+            'id' => 'required',
+            'name' => 'required',
+            'brand' => 'required',
+            'category' => 'required',
+            'gender' => 'required',
+            'weight' => 'required',
+            'quantity' => 'required',
+            'image' => 'required',
+            'rating' => 'required',
+            'price' => 'required',
+            'newPrice' => 'required',
+            'trending' => 'required',
+            'description' => 'required',
+        ]);
+        //return response()->json(['validatedData' => $validatedData],);
         // Save the image to public/assets
-        $imagePath = $request->file('image')->store('assets', 'public');
-
+        //$imagePath = $request->file('image')->storeAs('assets', 'public');
+        // file_put_contents(public_path('assets/test.txt'), 'Hello, World!');
+        // return response()->json(['message' => 'Product added successfully'], 201);
         // Create a new product
-        $product = new Product($validatedData);
-        $product->image = $imagePath;
-
+        $product = new Product();
+        $product->_id = $validatedData['id'];
+        $product->name = $validatedData['name'];
+        $product->brand = $validatedData['brand'];
+        $product->category = $validatedData['category'];
+        $product->gender = $validatedData['gender'];
+        $product->weight = $validatedData['weight'];
+        $product->quantity = $validatedData['quantity'];
+        $product->image = $validatedData['image'];
+        $product->rating = $validatedData['rating'];
+        $product->price = $validatedData['price'];
+        $product->newPrice = $validatedData['newPrice'];
+        $product->trending = $validatedData['trending'];
+        $product->description = $validatedData['description'];
+        //return response()->json(['product' => $product],);
         // Save the product to the database
         $product->save();
 
