@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Mail\WelcomeMail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -29,6 +31,7 @@ class AuthController extends Controller
             'password' => bcrypt($request->password),
         ]);
 
+        Mail::to($user->email)->send(new WelcomeMail());
         // Generate a token for the new user
         $token = $user->createToken('authToken')->accessToken;
 

@@ -9,6 +9,8 @@ use App\Models\Invoice;
 use App\Models\InvoiceDetail;
 use App\Models\Product;
 use App\Models\Address;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderMail;
 
 class CheckoutController extends Controller
 {
@@ -63,7 +65,7 @@ class CheckoutController extends Controller
                 'payment_method' => data_get($request->json()->all(), 'paymentMethod'),
             ]);
             $invoice->save();
-
+            Mail::to($user->email)->send(new OrderMail($invoice));
 
             // return response()->json($paymentMethod);
             if ($paymentMethod == 'vnpay') {
